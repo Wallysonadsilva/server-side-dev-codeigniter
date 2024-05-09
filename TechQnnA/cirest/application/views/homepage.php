@@ -131,19 +131,19 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="<?= site_url('homepage'); ?>" class="nav-link px-0 align-middle">
+                            <a href="<?= base_url(''); ?>index.php/homepage" class="nav-link px-0 align-middle">
                                 <i class="fs-4 bi-bootstrap"></i>
                                 <span class="ms-1 d-none d-sm-inline">Home</span>
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('homepage/askquestion'); ?>" class="nav-link px-0 align-middle">
+                            <a href="<?= base_url(''); ?>index.php/homepage/askquestion" class="nav-link px-0 align-middle">
                                 <i class="fs-4 bi-table"></i>
                                 <span class="ms-1 d-none d-sm-inline">Add New Question</span>
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('homepage/about'); ?>" class="nav-link px-0 align-middle">
+                            <a href="<?= base_url(''); ?>index.php/homepage/about" class="nav-link px-0 align-middle">
                                 <i class="fs-4 bi-bootstrap"></i>
                                 <span class="ms-1 d-none d-sm-inline">About</span>
                             </a>
@@ -153,32 +153,28 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <div class="dropdown pb-4">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg" alt="hugenerd" width="30" height="30" class="rounded-circle">
-                            <span class="d-none d-sm-inline mx-1" id="user-name">User Name</span>
+                            <span class="d-none d-sm-inline mx-1" id="user-name"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                            <li><a class="dropdown-item" href="<?= site_url('homepage/profile'); ?>">Profile</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/homepage/profile">Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="<?= site_url('account/logout'); ?>">Sign out</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/auth/logout">Sign out</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
             <div class="col py-3 min-vh-100">
                 <div class="row flex-nowrap">
-                    <!-- Computer Science Section -->
                     <div class="question-container">
                         <h2>Computer Science</h2>
                         <div class="list-group questions-list" id="questions-list">
-                            <!-- Questions will be populated here by JavaScript -->
                         </div>
                     </div>
-                    <!-- Trending Questions Section -->
                     <div class="trending-container">
                         <h3>Trending Questions</h3>
                         <div class="list-group trending-list" id="trending-list">
-                            <!-- Trending questions will be populated here by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -191,17 +187,16 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
     <script>
         $(document).ready(function() {
-            // Fetch and display user info
+            // Fetch and display username 
             $.ajax({
-                url: "<?= site_url('account/get_user_info'); ?>",
+                url: "<?= site_url('api/user'); ?>",
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
                     if (response.username) {
                         $('#user-name').text(response.username);
-                        console.log('Username fetched:', response.username);
                     } else {
-                        window.location.href = '<?= site_url('account/login_register'); ?>';
+                        window.location.href = '<?= base_url(''); ?>index.php';
                     }
                 },
                 error: function() {
@@ -226,7 +221,60 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 });
             }
 
-            // Display the questions in the list
+
+            // Fetch trending questions using REST API
+            function fetchTrendingQuestions() {
+                $.ajax({
+                    url: "<?= site_url('api/trending_questions'); ?>",
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        displayTrendingQuestions(response);
+                    },
+                    error: function() {
+                        alert('Error fetching trending questions');
+                    }
+                });
+            }
+
+            // Display the trending questions
+            function displayTrendingQuestions(questions) {
+                var html = '';
+                questions.forEach(function(question) {
+                    html += '<a href="<?= site_url('questions/view_question/'); ?>' + question.id + '" class="list-group-item list-group-item-action">';
+                    html += '<h5 class="mb-1">' + question.title + '</h5>';
+                    html += '<small class="text-muted">' + question.like_count + ' likes</small>';
+                    html += '</a>';
+                    html += '<br>';
+                });
+                $('#trending-list').html(html);
+            }
+            fetchQuestions();
+            fetchTrendingQuestions();
+
+            //NavBar Search 
+            $('#searchForm').submit(function(event) {
+                event.preventDefault();
+
+                var query = $('#searchInput').val();
+
+                $.ajax({
+                    url: '<?= site_url('api/navbar_search'); ?>',
+                    type: 'GET',
+                    data: {
+                        query: query
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        displayQuestions(response);
+                    },
+                    error: function() {
+                        alert('Error fetching search results');
+                    }
+                });
+            });
+
+            // Display the questions
             function displayQuestions(questions) {
                 var html = '';
                 questions.forEach(function(question) {
@@ -245,61 +293,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 });
                 $('#questions-list').html(html);
             }
-
-            // Fetch trending questions using REST API
-            function fetchTrendingQuestions() {
-                $.ajax({
-                    url: "<?= site_url('api/trending_questions'); ?>",
-                    type: 'GET',
-                    dataType: 'json',
-                    success: function(response) {
-                        displayTrendingQuestions(response);
-                    },
-                    error: function() {
-                        alert('Error fetching trending questions');
-                    }
-                });
-            }
-
-            // Display the trending questions in the list
-            function displayTrendingQuestions(questions) {
-                var html = '';
-                questions.forEach(function(question) {
-                    html += '<a href="<?= site_url('questions/view_question/'); ?>' + question.id + '" class="list-group-item list-group-item-action">';
-                    html += '<h5 class="mb-1">' + question.title + '</h5>';
-                    html += '<small class="text-muted">' + question.like_count + ' likes</small>';
-                    html += '</a>';
-                    html += '<br>';
-                });
-                $('#trending-list').html(html); // Update the trending questions list
-            }
-
-            // Initial data fetching
-            fetchQuestions();
-            fetchTrendingQuestions();
-
-            // Search form submission
-            $('#searchForm').submit(function(event) {
-                event.preventDefault(); // Prevent the default form submission
-
-                var query = $('#searchInput').val(); // Get the search query from the input field
-
-                // Send an AJAX request to the server to fetch search results
-                $.ajax({
-                    url: '<?= site_url('homepage/search'); ?>',
-                    type: 'GET',
-                    data: {
-                        query: query
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        displayQuestions(response);
-                    },
-                    error: function() {
-                        alert('Error fetching search results');
-                    }
-                });
-            });
         });
     </script>
 

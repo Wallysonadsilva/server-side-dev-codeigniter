@@ -60,6 +60,9 @@ $route['get_user_info'] = 'auth/get_user_info';
 $route['home'] = 'homepage/index';
 
 // REST API Routes
+$route['api/user'] = 'API/api/user';
+$route['api/update_profile'] = 'API/api/update_profile';
+$route['api/navbar_search'] = 'API/api/navbar_search';
 $route['api/user_questions'] = 'API/api/user_questions';
 $route['api/trending_questions'] = 'API/api/trending_questions';
 $route['api/questions'] = 'API/api/questions';

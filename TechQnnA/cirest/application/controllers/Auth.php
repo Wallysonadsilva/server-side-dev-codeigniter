@@ -22,13 +22,22 @@ class Auth extends CI_Controller
 
     public function register()
     {
-        $this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+        $this->form_validation->set_rules('email', 'Email', 'required|valid_email|trim');
         $this->form_validation->set_rules('username', 'Username', 'required|trim');
         $this->form_validation->set_rules('password', 'Password', 'required');
 
         $email = $this->input->post('email', true);
+        $username = $this->input->post('username', true);
+
+        // Check for existing email
         if ($this->User_model->is_email_taken($email)) {
             echo json_encode(['status' => 'error', 'message' => 'An account with this email already exists.']);
+            return;
+        }
+
+        // Check for existing username
+        if ($this->User_model->is_username_taken($username)) {
+            echo json_encode(['status' => 'error', 'message' => 'Username already exists. Please choose another one.']);
             return;
         }
 
@@ -38,8 +47,8 @@ class Auth extends CI_Controller
         } else {
             $data = [
                 'email' => $email,
-                'username' => $this->input->post('username', true),
-                'password' => $this->input->post('password', true),
+                'username' => $username,
+                'password' => password_hash($this->input->post('password', true), PASSWORD_DEFAULT),
             ];
 
             if ($this->User_model->register($data)) {

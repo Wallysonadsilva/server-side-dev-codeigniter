@@ -9,7 +9,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
-    <title>Ask a Question</title>
+    <title>TechQ&A - Ask a Question</title>
     <style>
         body,
         html {
@@ -144,13 +144,21 @@ defined('BASEPATH') or exit('No direct script access allowed');
             right: 10px;
             bottom: 10px;
         }
+
+        .btn {
+            background-color: #5D3FD3;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
 <body>
     <nav class="navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="<?= site_url('homepage/index'); ?>" style="font-weight: bold; color:#5D3FD3;">TechQ&A</a>
+            <a class="navbar-brand" href="<?= site_url('homepage'); ?>" style="font-weight: bold; color:#5D3FD3;">TechQ&A</a>
             <form class="d-flex" id="searchForm">
                 <input class="form-control me-2" type="search" id="searchInput" placeholder="Search for questions" aria-label="Search">
                 <button class="btn btn-secondary" type="submit">Search</button>
@@ -166,17 +174,21 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="<?= site_url('homepage/index'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-bootstrap"></i>
+                                <span class="ms-1 d-none d-sm-inline">Home</span>
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('homepage/askquestion'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Add New Question</span></a>
+                            <a href="<?= base_url(''); ?>index.php/homepage/askquestion" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-table"></i>
+                                <span class="ms-1 d-none d-sm-inline">Add New Question</span>
+                            </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('homepage/about'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">About</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage/about" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-bootstrap"></i>
+                                <span class="ms-1 d-none d-sm-inline">About</span>
                             </a>
                         </li>
                     </ul>
@@ -184,14 +196,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <div class="dropdown pb-4">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg" alt="hugenerd" width="30" height="30" class="rounded-circle">
-                            <span class="d-none d-sm-inline mx-1" id="user-name">User Name</span>
+                            <span class="d-none d-sm-inline mx-1" id="user-name"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                            <li><a class="dropdown-item" href="<?= site_url('homepage/profile'); ?>">Profile</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/homepage/profile">Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="<?= site_url('account/logout'); ?>">Sign out</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/auth/logout">Sign out</a></li>
                         </ul>
                     </div>
                 </div>
@@ -229,19 +241,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    <!-- Custom Script -->
     <script>
         $(document).ready(function() {
-            // Fetch user info
+            // Fetch username
             $.ajax({
-                url: "<?= site_url('account/get_user_info'); ?>",
+                url: "<?= site_url('api/user'); ?>",
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
                     if (response.username) {
                         $('#user-name').text(response.username);
                     } else {
-                        $('#user-name').text('Guest');
+                        window.location.href = '<?= base_url(''); ?>index.php';
                     }
                 },
                 error: function() {
@@ -294,7 +305,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
             // Submit question using the REST API
             $('#submitQuestionForm').on('submit', function(e) {
-                e.preventDefault(); // Prevent default form submission
+                e.preventDefault();
 
                 const data = {
                     title: $('#questionTitle').val(),
@@ -310,7 +321,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     success: function(response) {
                         if (response.status === 'success') {
                             alert('Question submitted successfully');
-                            loadUserQuestions(); // Reload user questions after submitting
+                            loadUserQuestions();
                         } else {
                             alert('Failed to submit question: ' + response.message);
                         }
@@ -355,14 +366,47 @@ defined('BASEPATH') or exit('No direct script access allowed');
             // Load user's questions on page load
             loadUserQuestions();
 
-            // Search form submission
+            //Navbar Search
             $('#searchForm').submit(function(event) {
-                event.preventDefault(); // Prevent the default form submission
+                event.preventDefault();
 
-                var query = $('#searchInput').val(); // Get the search query from the input field
+                var query = $('#searchInput').val();
 
-                window.location.href = '<?= site_url('homepage/index'); ?>?query=' + encodeURIComponent(query);
+                $.ajax({
+                    url: '<?= site_url('api/navbar_search'); ?>',
+                    type: 'GET',
+                    data: {
+                        query: query
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        displayQuestions(response);
+                    },
+                    error: function() {
+                        alert('Error fetching search results');
+                    }
+                });
             });
+
+            // Display the questions
+            function displayQuestions(questions) {
+                var html = '';
+                questions.forEach(function(question) {
+                    html += '<a href="<?= site_url('questions/view_question/'); ?>' + question.id + '" class="list-group-item list-group-item-action">';
+                    html += '<div class="d-flex w-100 justify-content-between">';
+                    html += '<h5 class="mb-1">' + question.title + '</h5>';
+                    html += '<small>' + question.created_at + '</small>';
+                    html += '</div>';
+                    html += '<p class="mb-1">' + question.description + '</p>';
+                    html += '<div class="d-flex w-100 justify-content-between">';
+                    html += '<small>' + question.tags + '</small>';
+                    html += '<small>' + question.answer_count + ' answers</small>';
+                    html += '</div>';
+                    html += '</a>';
+                    html += '<br>';
+                });
+                $('#questions-list').html(html);
+            }
         });
     </script>
 

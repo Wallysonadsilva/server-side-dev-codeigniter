@@ -24,19 +24,6 @@ class Question_model extends CI_Model
         return $query->result();
     }
 
-    // Search questions using a keyword
-    public function search_questions($query)
-    {
-        $this->db->select('Questions.*, COUNT(Answers.id) as answer_count');
-        $this->db->from('Questions');
-        $this->db->join('Answers', 'Answers.question_id = Questions.id', 'left');
-        $this->db->group_by('Questions.id');
-        $this->db->order_by('Questions.created_at', 'DESC');
-        $this->db->like('title', $query);
-        $this->db->or_like('description', $query);
-        $query = $this->db->get();
-        return $query->result();
-    }
 
     // Get answers by question ID
     public function get_answers_by_question_id($question_id)
@@ -50,7 +37,7 @@ class Question_model extends CI_Model
         return $query->result();
     }
 
-    // Get a specific question by ID
+    // Get question by ID
     public function get_question_by_id($id)
     {
         $this->db->select('Questions.*, Users.username as question_username');
@@ -61,8 +48,26 @@ class Question_model extends CI_Model
         return $query->row();
     }
 
+    // Add an answer
+    public function add_answer($data)
+    {
+        return $this->db->insert('Answers', $data);
+    }
 
-    // Fetch all questions by a specific user
+    // Get all questions and their answer counts
+    public function get_questions_with_answer_count($limit)
+    {
+        $this->db->select('Questions.*, COUNT(Answers.id) as answer_count');
+        $this->db->from('Questions');
+        $this->db->join('Answers', 'Answers.question_id = Questions.id', 'left');
+        $this->db->group_by('Questions.id');
+        $this->db->order_by('Questions.created_at', 'DESC');
+        $this->db->limit($limit);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    // Fetch all questions by user
     public function get_questions_by_user($user_id)
     {
         $this->db->where('user_id', $user_id);
@@ -71,26 +76,20 @@ class Question_model extends CI_Model
         return $query->result();
     }
 
-    // Method to delete both the question and its answers
+    // Method to delete question and its answers
     public function delete_question_and_answers($id)
     {
         $this->db->trans_start(); // Start transaction
-
-        // Delete the answers associated with the question
         $this->db->where('question_id', $id);
         $this->db->delete('Answers');
-
-        // Delete the question itself
         $this->db->where('id', $id);
         $this->db->delete('Questions');
-
-        $this->db->trans_complete(); // Complete transaction
-
-        return $this->db->trans_status(); // Returns true if successful, false otherwise
+        $this->db->trans_complete();
+        return $this->db->trans_status();
     }
 
 
-    // Get trending questions sorted by like count
+    // Get trending questions and sort by likes
     public function get_trending_questions_by_likes()
     {
         $this->db->select('Questions.*, COUNT(Question_likes.id) as like_count');
@@ -106,13 +105,11 @@ class Question_model extends CI_Model
     // Add or update a like/dislike for a question
     public function add_like_dislike($user_id, $question_id, $type)
     {
-        // Check if the user already reacted to this question
         $existing_reaction = $this->get_user_like_dislike($user_id, $question_id);
 
-        $this->db->trans_start(); // Start transaction for atomic operations
+        $this->db->trans_start();
 
         if ($existing_reaction) {
-            // If the same reaction type already exists, remove it (unlike/un-dislike)
             if ($existing_reaction['type'] === $type) {
                 $this->db->where('user_id', $user_id)
                     ->where('question_id', $question_id)
@@ -129,7 +126,6 @@ class Question_model extends CI_Model
                 $this->update_like_dislike_count($question_id, $type, 1);
             }
         } else {
-            // Insert a new reaction
             $data = [
                 'user_id' => $user_id,
                 'question_id' => $question_id,
@@ -138,13 +134,11 @@ class Question_model extends CI_Model
             $this->db->insert('Question_likes', $data);
             $this->update_like_dislike_count($question_id, $type, 1);
         }
-
-        $this->db->trans_complete(); // Complete the transaction
-
-        return $this->db->trans_status(); // Returns true if successful, false otherwise
+        $this->db->trans_complete();
+        return $this->db->trans_status();
     }
 
-    // Update the like/dislike count of a question
+    // Update the like/dislike count
     private function update_like_dislike_count($question_id, $type, $increment)
     {
         $field = ($type === 'like') ? 'likes_count' : 'dislikes_count';
@@ -154,7 +148,7 @@ class Question_model extends CI_Model
             ->update('Questions');
     }
 
-    // Get the count of likes/dislikes for a question
+    // Get the count of likes/dislikes
     public function count_like_dislike($question_id)
     {
         $this->db->select('likes_count, dislikes_count')
@@ -164,7 +158,7 @@ class Question_model extends CI_Model
         return $query->row_array();
     }
 
-    // Get a user's like/dislike reaction for a specific question
+    // Get a user's like/dislike
     public function get_user_like_dislike($user_id, $question_id)
     {
         $this->db->select('type')
@@ -173,5 +167,17 @@ class Question_model extends CI_Model
             ->where('question_id', $question_id);
         $query = $this->db->get();
         return $query->row_array();
+    }
+
+    // Search questions by title/tags
+    public function search_questions_navbar($query)
+    {
+        $lower_query = strtolower($query);
+
+        $this->db->where("LOWER(title) LIKE '%{$lower_query}%'");
+        $this->db->or_where("LOWER(tags) LIKE '%{$lower_query}%'");
+
+        $result = $this->db->get('Questions');
+        return $result->result_array();
     }
 }

@@ -1,15 +1,10 @@
-<?php
-defined('BASEPATH') or exit('No direct script access allowed');
-?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>TechQ&A - Profile</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-
-    <title>Profile - TechQ&A</title>
     <style>
         body,
         html {
@@ -46,6 +41,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
             height: auto;
             overflow-y: auto;
             background-color: #FFA500;
+            border-radius: 5px;
         }
 
         .sidebar a {
@@ -61,7 +57,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
             background-color: #f0f0f0;
             padding: 20px;
             margin: 10px auto;
-            width: 65%;
+            width: 50%;
             border-radius: 5px;
         }
 
@@ -89,12 +85,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
             justify-content: center;
             margin-top: 20px;
         }
-
-        .forms-container {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-        }
     </style>
 </head>
 
@@ -103,7 +93,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         <div class="container-fluid">
             <a class="navbar-brand" href="<?= site_url('home'); ?>" style="font-weight: bold; color:#5D3FD3;">TechQ&A</a>
             <form class="d-flex" role="search">
-                <input class="form-control me-2" type="search" placeholder="What's Your Question?" aria-label="Seach for">
+                <input class="form-control me-2" type="search" placeholder="What's Your Question?" aria-label="Search for">
                 <button class="btn btn-secondary" type="submit">Search</button>
             </form>
         </div>
@@ -114,40 +104,39 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">
                 <div class="sidebar d-flex flex-column align-items-center align-items-sm-start px-3 pt-2">
                     <span class="fs-5 d-none d-sm-inline" id="menulist">Menu</span>
+
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="<?= site_url('home'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-bootstrap"></i>
+                                <span class="ms-1 d-none d-sm-inline">Home</span>
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('askquestion'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Question?</span></a>
-                        </li>
-                        <li>
-                            <a href="<?= site_url('about'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">About</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage/askquestion" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-table"></i>
+                                <span class="ms-1 d-none d-sm-inline">Add New Question</span>
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('contact'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">Contact</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage/about" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-bootstrap"></i>
+                                <span class="ms-1 d-none d-sm-inline">About</span>
                             </a>
                         </li>
                     </ul>
                     <hr>
                     <div class="dropdown pb-4">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg" alt="User" width="30" height="30" class="rounded-circle">
-                            <span class="d-none d-sm-inline mx-1" id="user-name"><?= htmlspecialchars($username); ?></span>
-                        </a>
+                            <img src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg" alt="hugenerd" width="30" height="30" class="rounded-circle">
+                            <span class="d-none d-sm-inline mx-1" id="user-name"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                            <li><a class="dropdown-item" href="<?= site_url('homepage/profile'); ?>">Profile</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/homepage/profile">Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="<?= site_url('account/logout'); ?>">Sign out</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/auth/logout">Sign out</a></li>
                         </ul>
                     </div>
                 </div>
@@ -155,9 +144,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <div class="col py-3 min-vh-100">
                 <div class="profile-container">
                     <h2>Profile</h2>
-                    <p><strong>Username:</strong> <?= isset($user) ? htmlspecialchars($user->username) : 'N/A'; ?></p>
-                    <p><strong>Email:</strong> <?= isset($user) ? htmlspecialchars($user->email) : 'N/A'; ?></p>
-                    <p><strong>Bio:</strong> <?= isset($user) ? htmlspecialchars($user->bio) : 'N/A'; ?></p>
+                    <p><strong>Username:</strong> <span id="profile-username"></span></p>
+                    <p><strong>Email:</strong> <span id="profile-email"></span></p>
+                    <p><strong>Bio:</strong> <span id="profile-bio"></span></p>
                     <div class="btn-container">
                         <a href="<?= site_url('homepage/edit_profile'); ?>" class="btn">Edit Profile</a>
                     </div>
@@ -172,20 +161,63 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <script>
         $(document).ready(function() {
             $.ajax({
-                url: "<?= site_url('account/get_user_info'); ?>",
+                url: "<?= site_url('api/user'); ?>", // Assuming this is your API endpoint
                 type: 'GET',
                 dataType: 'json',
-                success: function(response) {
-                    if (response.username) {
-                        $('#user-name').text(response.username);
-                    } else {
-                        window.location.href = '<?= site_url('account/login_register'); ?>';
-                    }
+                success: function(user) {
+                    $('#profile-username').text(user.username || 'N/A');
+                    $('#profile-email').text(user.email || 'N/A');
+                    $('#profile-bio').text(user.bio || 'N/A');
+                    $('#user-name').text(user.username || 'User');
                 },
                 error: function() {
                     alert('Error loading user data');
                 }
             });
+
+
+            // NavBar Search 
+            $('#searchForm').submit(function(event) {
+                event.preventDefault();
+
+                var query = $('#searchInput').val();
+
+
+                $.ajax({
+                    url: '<?= site_url('api/navbar_search'); ?>',
+                    type: 'GET',
+                    data: {
+                        query: query
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        displayQuestions(response);
+                    },
+                    error: function() {
+                        alert('Error fetching search results');
+                    }
+                });
+            });
+
+            // Display the questions in the list
+            function displayQuestions(questions) {
+                var html = '';
+                questions.forEach(function(question) {
+                    html += '<a href="<?= site_url('questions/view_question/'); ?>' + question.id + '" class="list-group-item list-group-item-action">';
+                    html += '<div class="d-flex w-100 justify-content-between">';
+                    html += '<h5 class="mb-1">' + question.title + '</h5>';
+                    html += '<small>' + question.created_at + '</small>';
+                    html += '</div>';
+                    html += '<p class="mb-1">' + question.description + '</p>';
+                    html += '<div class="d-flex w-100 justify-content-between">';
+                    html += '<small>' + question.tags + '</small>';
+                    html += '<small>' + question.answer_count + ' answers</small>';
+                    html += '</div>';
+                    html += '</a>';
+                    html += '<br>';
+                });
+                $('#questions-list').html(html);
+            }
         });
     </script>
 

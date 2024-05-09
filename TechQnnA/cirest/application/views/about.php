@@ -9,7 +9,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
-    <title>About TechQ&A</title>
+    <title>TechQ&A - About </title>
     <style>
         body,
         html {
@@ -85,7 +85,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
         }
 
         .trending-container {
-            max-height: 550px;
             background-color: #FFA500;
             margin: 10px auto;
             padding: 20px;
@@ -132,17 +131,21 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
                     <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                         <li class="nav-item">
-                            <a href="<?= site_url('homepage/index'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-bootstrap"></i>
+                                <span class="ms-1 d-none d-sm-inline">Home</span>
                             </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('homepage/askquestion'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Add New Question</span></a>
+                            <a href="<?= base_url(''); ?>index.php/homepage/askquestion" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-table"></i>
+                                <span class="ms-1 d-none d-sm-inline">Add New Question</span>
+                            </a>
                         </li>
                         <li>
-                            <a href="<?= site_url('homepage/about'); ?>" class="nav-link px-0 align-middle">
-                                <i class="fs-4 bi-bootstrap"></i> <span class="ms-1 d-none d-sm-inline">About</span>
+                            <a href="<?= base_url(''); ?>index.php/homepage/about" class="nav-link px-0 align-middle">
+                                <i class="fs-4 bi-bootstrap"></i>
+                                <span class="ms-1 d-none d-sm-inline">About</span>
                             </a>
                         </li>
                     </ul>
@@ -150,22 +153,20 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <div class="dropdown pb-4">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-social-600nw-1677509740.jpg" alt="hugenerd" width="30" height="30" class="rounded-circle">
-                            <span class="d-none d-sm-inline mx-1" id="user-name">User Name</span>
+                            <span class="d-none d-sm-inline mx-1" id="user-name"></span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-                            <li><a class="dropdown-item" href="<?= site_url('homepage/profile'); ?>">Profile</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/homepage/profile">Profile</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="<?= site_url('account/logout'); ?>">Sign out</a></li>
+                            <li><a class="dropdown-item" href="<?= base_url(''); ?>index.php/auth/logout">Sign out</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
             <div class="col py-3 min-vh-100">
-                <!-- Start of the main content area -->
                 <div class="row flex-nowrap">
-                    <!-- Computer Science Section -->
                     <div class="question-container">
                         <h2>About</h2>
                         <div class="list-group questions-list">
@@ -202,21 +203,12 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             </div>
                         </div>
                     </div>
-                    <!-- Trending Questions Section -->
                     <div class="trending-container">
                         <h3>Trending Questions</h3>
-                        <div class="list-group trending-list">
-                            <?php foreach ($trending_questions as $question) : ?>
-                                <a href="<?= site_url('questions/view_question/' . $question->id); ?>" class="list-group-item list-group-item-action">
-                                    <h5 class="mb-1"><?= htmlspecialchars($question->title); ?></h5>
-                                    <small class="text-muted"><?= $question->like_count; ?> likes</small>
-                                </a>
-                                <br>
-                            <?php endforeach; ?>
+                        <div class="list-group trending-list" id="trending-list">
                         </div>
                     </div>
                 </div>
-                <!-- End of the main content area -->
             </div>
         </div>
     </div>
@@ -228,20 +220,50 @@ defined('BASEPATH') or exit('No direct script access allowed');
         $(document).ready(function() {
             // Fetch user info
             $.ajax({
-                url: "<?= site_url('account/get_user_info'); ?>",
+                url: "<?= site_url('api/user'); ?>",
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
                     if (response.username) {
                         $('#user-name').text(response.username);
                     } else {
-                        $('#user-name').text('Guest');
+                        window.location.href = '<?= base_url(''); ?>index.php';
                     }
                 },
                 error: function() {
                     alert('Error loading user data');
                 }
             });
+
+            // Fetch trending questions using REST API
+            function fetchTrendingQuestions() {
+                $.ajax({
+                    url: "<?= site_url('api/trending_questions'); ?>",
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        displayTrendingQuestions(response);
+                    },
+                    error: function() {
+                        alert('Error fetching trending questions');
+                    }
+                });
+            }
+
+            // Display the trending questions
+            function displayTrendingQuestions(questions) {
+                var html = '';
+                questions.forEach(function(question) {
+                    html += '<a href="<?= site_url('questions/view_question/'); ?>' + question.id + '" class="list-group-item list-group-item-action">';
+                    html += '<h5 class="mb-1">' + question.title + '</h5>';
+                    html += '<small class="text-muted">' + question.like_count + ' likes</small>';
+                    html += '</a>';
+                    html += '<br>';
+                });
+                $('#trending-list').html(html);
+            }
+
+            fetchTrendingQuestions();
 
             // Search form submission
             $('#searchForm').submit(function(event) {

@@ -12,57 +12,31 @@ class Homepage extends CI_Controller
         $this->load->helper(['url', 'html']);
     }
 
+    // when user login, load all data necessary for homepage
     public function index()
     {
-        $user_id = $this->session->userdata('user_id');
-        $user = $this->User_model->get_user_by_id($user_id);
 
-
-        $query = $this->input->get('query');
-        if ($query) {
-            $questions = $this->Question_model->search_questions($query);
-        } else {
-            $questions = $this->Question_model->get_questions_with_answer_count(9);
-        }
-
-        $trending_questions = $this->Question_model->get_trending_questions_by_likes();
-
-        $data = [
-            'questions' => $questions,
-            'trending_questions' => $trending_questions,
-            'username' => $user ? $user->username : 'Guest',
-            'query' => $query
-        ];
-
-        $this->load->view('homepage', $data);
+        $this->load->view('homepage');
     }
 
-
+    //redirect to about page and load trending questions
     public function about()
     {
-        $trending_questions = $this->Question_model->get_trending_questions_by_likes();
+        $this->load->view('about');
+    }
 
-        $data = [
-            'trending_questions' => $trending_questions
-        ];
-        $this->load->view('about', $data);
+    public function profile()
+    {
+        $this->load->view('profile');
+    }
+
+    public function edit_profile()
+    {
+        $this->load->view('edit_profile');
     }
 
     public function askquestion()
     {
         $this->load->view('askquestion');
-    }
-
-    public function search()
-    {
-        $query = $this->input->get('query');
-
-        if ($query) {
-            $search_results = $this->Question_model->search_questions($query);
-
-            echo json_encode($search_results);
-        } else {
-            echo json_encode([]);
-        }
     }
 }

@@ -9,7 +9,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 
-    <title>Login and Registration</title>
+    <title>TechQ&A</title>
     <style>
         body,
         html {
@@ -145,7 +145,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 <body>
     <nav class="navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="<?= base_url(''); ?>homepage" style="font-weight: bold; color:#5D3FD3;">TechQ&A</a>
+            <a class="navbar-brand" href="<?= base_url('homepage'); ?>" style="font-weight: bold; color:#5D3FD3;">TechQ&A</a>
             <form class="d-flex" id="searchForm">
                 <input class="form-control me-2" type="search" id="searchInput" placeholder="Search for questions" aria-label="Search">
                 <button class="btn btn-secondary" type="submit">Search</button>
@@ -183,25 +183,28 @@ defined('BASEPATH') or exit('No direct script access allowed');
                             <label for="login-password">Password</label>
                             <input type="password" id="login-password" name="password" required>
                             <button type="submit">Login</button>
-                            <a href="/account/forgotpassword">Forgot password?</a>
+                            <a href="">Forgot password?</a>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="alert alert-danger" id="alert"></div>
+        <div class="alert" id="alert"></div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Clear and hide the alert
+            // Display alert messages
             function showAlert(message, type = 'danger') {
                 $('#alert').removeClass('alert-success alert-danger').addClass(`alert-${type}`).html(message).show();
+                setTimeout(function() {
+                    $('#alert').fadeOut();
+                }, 5000); // Hide after 5 seconds
             }
 
-            // Registration form submission
+            // Registration form
             $('#register-form').on('submit', function() {
                 $.ajax({
                     url: "<?= site_url('auth/register'); ?>",
@@ -226,7 +229,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 });
             });
 
-            // Login form submission
+            // Login form
             $('#login-form').on('submit', function() {
                 $.ajax({
                     url: "<?= site_url('auth/login'); ?>",
@@ -244,24 +247,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
                         }
                     },
                     error: function() {
-                        showAlert('Error during login. Please try again.');
+                        showAlert('Error loggin in. Please try again.');
                     }
                 });
             });
 
-            function showAlert(message) {
-                $('#alert').removeClass('alert-success').addClass('alert-danger').html(message).show();
-            }
-
-            // Form submission event handler
+            //Search bar feature, it Checks if user is logged checking for session before the search
             $('#searchForm').submit(function(e) {
-                // Check if user is logged in
                 if (!<?= $this->session->userdata('user_id') ? 'true' : 'false' ?>) {
-                    e.preventDefault(); // Prevent form submission
-                    showAlert('Please login first.'); // Show alert message
+                    e.preventDefault();
+                    showAlert('Please login first.');
                 }
             });
-
         });
     </script>
 
